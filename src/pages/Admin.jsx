@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient'
 import { useApp } from '../App'
 
 export default function Admin() {
-  const { teams: globalTeams, players: globalPlayers } = useApp()
+  const { teams: globalTeams, players: globalPlayers, refreshData } = useApp()
   const [tab, setTab] = useState('scores')
   const [games, setGames] = useState([])
   const [teams, setTeams] = useState([])
@@ -48,6 +48,9 @@ export default function Admin() {
   const [newPin, setNewPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
 
+  // Voting toggle
+  const [votingEnabled, setVotingEnabled] = useState(true)
+
   useEffect(() => {
     loadData()
   }, [])
@@ -57,14 +60,16 @@ export default function Admin() {
   }, [potwWeek])
 
   async function loadData() {
-    const [gamesRes, teamsRes, playersRes] = await Promise.all([
+    const [gamesRes, teamsRes, playersRes, settingsRes] = await Promise.all([
       supabase.from('games').select('*').order('week').order('game_time'),
       supabase.from('teams').select('*').order('id'),
-      supabase.from('players').select('*').order('name')
+      supabase.from('players').select('*').order('name'),
+      supabase.from('settings').select('*').eq('key', 'voting_enabled').single()
     ])
     if (gamesRes.data) setGames(gamesRes.data)
     if (teamsRes.data) setTeams(teamsRes.data)
     if (playersRes.data) setPlayers(playersRes.data)
+    if (settingsRes.data) setVotingEnabled(settingsRes.data.value === 'true')
     setLoading(false)
   }
 
@@ -187,6 +192,7 @@ export default function Admin() {
       setMessage({ type: 'success', text: 'Team updated!' })
       setEditingTeam(null)
       loadData()
+      refreshData() // Update global context
     }
   }
 
@@ -219,11 +225,12 @@ export default function Admin() {
 
     setSaving(false)
     if (error) {
-      setMessage({ type: 'error', text: 'Failed to save player' })
+      setMessage({ type: 'error', text: 'Failed to save player: ' + error.message })
     } else {
       setMessage({ type: 'success', text: editingPlayer ? 'Player updated!' : 'Player added!' })
       resetPlayerForm()
       loadData()
+      refreshData() // Update global context
     }
   }
 
@@ -231,6 +238,7 @@ export default function Admin() {
     if (!confirm('Delete this player?')) return
     await supabase.from('players').delete().eq('id', id)
     loadData()
+    refreshData() // Update global context
   }
 
   function resetPlayerForm() {
@@ -301,6 +309,24 @@ export default function Admin() {
     }
   }
 
+  async function toggleVoting() {
+    const newValue = !votingEnabled
+    setSaving(true)
+    
+    const { error } = await supabase
+      .from('settings')
+      .update({ value: newValue.toString(), updated_at: new Date().toISOString() })
+      .eq('key', 'voting_enabled')
+    
+    setSaving(false)
+    if (error) {
+      setMessage({ type: 'error', text: 'Failed to update voting setting: ' + error.message })
+    } else {
+      setVotingEnabled(newValue)
+      setMessage({ type: 'success', text: newValue ? 'Voting enabled!' : 'Voting disabled!' })
+    }
+  }
+
   // Group games by week
   const gamesByWeek = games.reduce((acc, g) => {
     if (!acc[g.week]) acc[g.week] = []
@@ -341,10 +367,11 @@ export default function Admin() {
 
       {/* Message */}
       {message && (
-        <div className={`mb-4 p-3 rounded-lg text-sm ${message.type === 'success'
-            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+        <div className={`mb-4 p-3 rounded-lg text-sm ${
+          message.type === 'success' 
+            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
             : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-          }`}>
+        }`}>
           {message.text}
         </div>
       )}
@@ -459,7 +486,7 @@ export default function Admin() {
               <p className="text-xs text-gray-500 mb-3">
                 Week {editingGame.week}: {editingGame.home_team} vs {editingGame.away_team}
               </p>
-
+              
               <div className="space-y-3">
                 <div>
                   <label className="text-xs text-gray-500 block mb-1">Date (optional)</label>
@@ -527,7 +554,7 @@ export default function Admin() {
                     <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                       {game.game_date && (
                         <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
-                          📅 {new Date(game.game_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          📅 {new Date(game.game_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </span>
                       )}
                       <span className="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
@@ -549,7 +576,7 @@ export default function Admin() {
           {editingTeam ? (
             <form onSubmit={saveTeam} className="card mb-4">
               <h3 className="font-medium dark:text-white mb-3">Edit Team</h3>
-
+              
               <div className="space-y-3">
                 <div>
                   <label className="text-xs text-gray-500 block mb-1">Team Name</label>
@@ -662,7 +689,7 @@ export default function Admin() {
               <h3 className="font-medium dark:text-white mb-3">
                 {editingPlayer ? 'Edit Player' : 'Add Player'}
               </h3>
-
+              
               <div className="space-y-3">
                 <div>
                   <label className="text-xs text-gray-500 block mb-1">Name</label>
@@ -901,7 +928,7 @@ export default function Admin() {
         <div className="space-y-4">
           <form onSubmit={changePin} className="card">
             <h3 className="font-medium dark:text-white mb-3">Change Admin PIN</h3>
-
+            
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-gray-500 block mb-1">Current PIN</label>
@@ -943,6 +970,26 @@ export default function Admin() {
               {saving ? 'Saving...' : 'Change PIN'}
             </button>
           </form>
+
+          <div className="card">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium dark:text-white">Weekly Voting</h3>
+                <p className="text-xs text-gray-500">Allow users to vote for Player of the Week</p>
+              </div>
+              <button
+                onClick={toggleVoting}
+                disabled={saving}
+                className={`relative w-12 h-7 rounded-full transition-colors ${
+                  votingEnabled ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
+                }`}
+              >
+                <span className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform shadow ${
+                  votingEnabled ? 'left-6' : 'left-1'
+                }`} />
+              </button>
+            </div>
+          </div>
 
           <div className="card">
             <h3 className="font-medium dark:text-white mb-2">Quick Stats</h3>

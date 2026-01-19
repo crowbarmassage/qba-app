@@ -99,8 +99,8 @@ export default function GameCard({ game, expanded = false }) {
   // Share game
   async function handleShare() {
     const text = hasScore
-      ? `${game.home_team} ${game.home_score} - ${game.away_score} ${game.away_team} 🏀 #MWBL`
-      : `${game.home_team} vs ${game.away_team} • ${game.game_time} 🏀 #MWBL`
+      ? `${game.home_team} ${game.home_score} - ${game.away_score} ${game.away_team} 🏀 #QBA`
+      : `${game.home_team} vs ${game.away_team} • ${game.game_time} 🏀 #QBA`
 
     if (navigator.share) {
       try { await navigator.share({ text }) } catch {}
@@ -175,7 +175,7 @@ export default function GameCard({ game, expanded = false }) {
         <span>
           {game.game_date && (
             <span className="mr-2">
-              📅 {new Date(game.game_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              📅 {new Date(game.game_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </span>
           )}
           🕐 {game.game_time}

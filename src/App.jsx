@@ -23,7 +23,7 @@ export default function App() {
   const userId = useUserId()
   const [darkMode, toggleDark] = useDarkMode()
   const isPWA = useIsPWA()
-
+  
   const [teams, setTeams] = useState([])
   const [players, setPlayers] = useState([])
   const [isAdmin, setIsAdmin] = useState(false)
@@ -32,22 +32,27 @@ export default function App() {
 
   // Fetch initial data
   useEffect(() => {
-    async function load() {
-      const [teamsRes, playersRes] = await Promise.all([
-        supabase.from('teams').select('*').order('id'),
-        supabase.from('players').select('*').order('name')
-      ])
-      if (teamsRes.data) setTeams(teamsRes.data)
-      if (playersRes.data) setPlayers(playersRes.data)
-      setLoading(false)
-    }
-    load()
+    loadData()
 
     // Check admin status
     if (localStorage.getItem('qba_admin') === 'true') {
       setIsAdmin(true)
     }
   }, [])
+
+  async function loadData() {
+    const [teamsRes, playersRes] = await Promise.all([
+      supabase.from('teams').select('*').order('id'),
+      supabase.from('players').select('*').order('name')
+    ])
+    if (teamsRes.data) setTeams(teamsRes.data)
+    if (playersRes.data) setPlayers(playersRes.data)
+    setLoading(false)
+  }
+
+  const refreshData = () => {
+    loadData()
+  }
 
   const handleAdminLogin = async (pin) => {
     // Check PIN from database
@@ -56,9 +61,9 @@ export default function App() {
       .select('value')
       .eq('key', 'admin_pin')
       .single()
-
+    
     const correctPin = data?.value || '1234'
-
+    
     if (pin === correctPin) {
       localStorage.setItem('qba_admin', 'true')
       setIsAdmin(true)
@@ -80,7 +85,8 @@ export default function App() {
     isAdmin,
     darkMode,
     toggleDark,
-    isPWA
+    isPWA,
+    refreshData
   }
 
   return (

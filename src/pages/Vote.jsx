@@ -10,6 +10,19 @@ export default function Vote() {
   const [winner, setWinner] = useState(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [votingEnabled, setVotingEnabled] = useState(true)
+
+  // Check if voting is enabled
+  useEffect(() => {
+    supabase
+      .from('settings')
+      .select('value')
+      .eq('key', 'voting_enabled')
+      .single()
+      .then(({ data }) => {
+        if (data) setVotingEnabled(data.value === 'true')
+      })
+  }, [])
 
   // Determine current week
   useEffect(() => {
@@ -108,6 +121,21 @@ export default function Vote() {
         <div className="skeleton h-10 w-48 mb-4" />
         <div className="skeleton h-32 mb-3" />
         <div className="skeleton h-48" />
+      </div>
+    )
+  }
+
+  if (!votingEnabled) {
+    return (
+      <div className="p-4">
+        <h2 className="text-lg font-semibold dark:text-white mb-4">Player of the Week</h2>
+        <div className="card text-center py-8">
+          <p className="text-4xl mb-3">🗳️</p>
+          <h3 className="font-semibold dark:text-white mb-2">Voting is Currently Disabled</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Check back later when voting opens for the next week!
+          </p>
+        </div>
       </div>
     )
   }

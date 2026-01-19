@@ -44,7 +44,37 @@ export default function Schedule() {
   }, [])
 
   const weeks = [...new Set(games.map(g => g.week))].sort((a, b) => a - b)
-  const weekGames = games.filter(g => g.week === selectedWeek)
+  
+  // Sort games by date, then time, then court
+  const weekGames = games
+    .filter(g => g.week === selectedWeek)
+    .sort((a, b) => {
+      // First sort by date
+      const dateA = a.game_date || '9999-99-99'
+      const dateB = b.game_date || '9999-99-99'
+      if (dateA !== dateB) return dateA.localeCompare(dateB)
+      
+      // Then sort by time
+      const parseTime = (t) => {
+        if (!t) return 0
+        const match = t.match(/(\d+):(\d+)\s*(AM|PM)/i)
+        if (!match) return 0
+        let hours = parseInt(match[1])
+        const mins = parseInt(match[2])
+        const isPM = match[3].toUpperCase() === 'PM'
+        if (isPM && hours !== 12) hours += 12
+        if (!isPM && hours === 12) hours = 0
+        return hours * 100 + mins
+      }
+      
+      const timeA = parseTime(a.game_time)
+      const timeB = parseTime(b.game_time)
+      
+      if (timeA !== timeB) return timeA - timeB
+      
+      // Finally sort by court
+      return (a.court || 0) - (b.court || 0)
+    })
 
   const weekLabel = (w) => {
     if (w === 9) return 'Finals'
