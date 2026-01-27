@@ -7,10 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'robots.txt', 'icon-192.svg', 'icon-512.svg'],
       manifest: {
-        name: 'MWBL - Muslim Women\'s Basketball League',
-        short_name: 'MWBL',
+        name: 'QBA - Basketball League',
+        short_name: 'QBA',
         description: 'Schedule, standings, and stats for our league',
         theme_color: '#1e3a5f',
         background_color: '#f9fafb',
@@ -19,14 +19,14 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'icon-192.png',
+            src: 'icon-192.svg',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/svg+xml'
           },
           {
-            src: 'icon-512.png',
+            src: 'icon-512.svg',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'any maskable'
           }
         ]
