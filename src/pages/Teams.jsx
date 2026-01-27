@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '../App'
+import { getContrastTextColor } from '../utils/colorUtils'
 
 export default function Teams() {
   const { teams, players } = useApp()
@@ -27,7 +28,7 @@ export default function Teams() {
               className="card flex items-center gap-4 hover:shadow-md transition-shadow"
             >
               <div
-                className="avatar-lg shrink-0"
+                className={`avatar-lg shrink-0 ${getContrastTextColor(team.color)}`}
                 style={{ backgroundColor: team.color }}
               >
                 {team.short_name}

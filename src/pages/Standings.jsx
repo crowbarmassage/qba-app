@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useApp } from '../App'
+import { getContrastTextColor } from '../utils/colorUtils'
 
 export default function Standings() {
   const { teams } = useApp()
@@ -171,7 +172,7 @@ export default function Standings() {
 
           <div className="flex items-center justify-between">
             <div className="text-center flex-1">
-              <div className="avatar mx-auto mb-1" style={{ backgroundColor: h2h.team1?.color }}>
+              <div className={`avatar mx-auto mb-1 ${getContrastTextColor(h2h.team1?.color)}`} style={{ backgroundColor: h2h.team1?.color }}>
                 {h2h.team1?.short_name}
               </div>
               <div className="text-2xl font-bold dark:text-white">{h2h.t1Wins}</div>
@@ -179,7 +180,7 @@ export default function Standings() {
             </div>
             <div className="px-4 text-gray-400">vs</div>
             <div className="text-center flex-1">
-              <div className="avatar mx-auto mb-1" style={{ backgroundColor: h2h.team2?.color }}>
+              <div className={`avatar mx-auto mb-1 ${getContrastTextColor(h2h.team2?.color)}`} style={{ backgroundColor: h2h.team2?.color }}>
                 {h2h.team2?.short_name}
               </div>
               <div className="text-2xl font-bold dark:text-white">{h2h.t2Wins}</div>
@@ -229,7 +230,7 @@ export default function Standings() {
                       onClick={e => e.stopPropagation()}
                       className="flex items-center gap-2"
                     >
-                      <div className="avatar-sm" style={{ backgroundColor: team.color }}>
+                      <div className={`avatar-sm ${getContrastTextColor(team.color)}`} style={{ backgroundColor: team.color }}>
                         {team.short_name?.charAt(0)}
                       </div>
                       <span className="font-medium dark:text-white">{team.name}</span>

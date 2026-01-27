@@ -144,7 +144,7 @@ export default function GameCard({ game, expanded = false }) {
         <div className={`flex-1 ${homeWon ? 'font-bold' : ''}`}>
           <div className="text-base dark:text-white truncate">{game.home_team}</div>
           {hasScore && (
-            <div className={`text-3xl font-bold mt-1 ${homeWon ? 'text-primary-500' : 'text-gray-400'}`}>
+            <div className={`text-3xl font-bold mt-1 ${homeWon ? 'text-green-500' : 'text-red-400'}`}>
               {game.home_score}
             </div>
           )}
@@ -163,7 +163,7 @@ export default function GameCard({ game, expanded = false }) {
         <div className={`flex-1 text-right ${awayWon ? 'font-bold' : ''}`}>
           <div className="text-base dark:text-white truncate">{game.away_team}</div>
           {hasScore && (
-            <div className={`text-3xl font-bold mt-1 ${awayWon ? 'text-primary-500' : 'text-gray-400'}`}>
+            <div className={`text-3xl font-bold mt-1 ${awayWon ? 'text-green-500' : 'text-red-400'}`}>
               {game.away_score}
             </div>
           )}
