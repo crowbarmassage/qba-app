@@ -201,9 +201,7 @@ export default function Standings() {
               <th className="w-8 pl-3">#</th>
               <th>Team</th>
               <th className="text-center w-10">W</th>
-              <th className="text-center w-10">L</th>
-              <th className="text-center w-12">+/-</th>
-              <th className="text-center w-12 pr-3">Strk</th>
+              <th className="text-center w-10 pr-3">L</th>
             </tr>
           </thead>
           <tbody>
@@ -241,18 +239,7 @@ export default function Standings() {
                   <td className="text-center font-semibold text-green-600 dark:text-green-400">
                     {team.wins}
                   </td>
-                  <td className="text-center text-gray-500">{team.losses}</td>
-                  <td className={`text-center font-medium
-                    ${team.diff > 0 ? 'text-green-600 dark:text-green-400' : ''}
-                    ${team.diff < 0 ? 'text-red-500' : ''}
-                    ${team.diff === 0 ? 'text-gray-400' : ''}`}>
-                    {team.diff > 0 ? '+' : ''}{team.diff}
-                  </td>
-                  <td className={`text-center pr-3 text-sm font-medium
-                    ${team.currentStreak?.startsWith('W') ? 'text-green-600' : ''}
-                    ${team.currentStreak?.startsWith('L') ? 'text-red-500' : ''}`}>
-                    {team.currentStreak}
-                  </td>
+                  <td className="text-center text-gray-500 pr-3">{team.losses}</td>
                 </tr>
               )
             })}
